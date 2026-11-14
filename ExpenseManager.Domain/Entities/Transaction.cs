@@ -47,6 +47,25 @@ public class Transaction
         Description = newDescription.Trim();
     }
 
+    public void Update(
+        Guid categoryId,
+        TransactionType type,
+        decimal amount,
+        string description,
+        DateOnly date)
+    {
+        ValidateCategoryId(categoryId);
+        ValidateType(type);
+        ValidateAmount(amount);
+        ValidateDescription(description);
+
+        CategoryId = categoryId;
+        Type = type;
+        Amount = amount;
+        Description = description.Trim();
+        Date = date;
+    }
+
     private static void ValidateCategoryId(Guid categoryId)
     {
         if (categoryId == Guid.Empty)

@@ -1,4 +1,6 @@
 using ExpenseManager.Application.Transactions.CreateTransaction;
+using UpdateTransactionNotFoundException = ExpenseManager.Application.Transactions.UpdateTransaction.TransactionNotFoundException;
+using DeleteTransactionNotFoundException = ExpenseManager.Application.Transactions.DeleteTransaction.TransactionNotFoundException;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +19,13 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
                 (
                     StatusCodes.Status404NotFound,
                     "Category Not Found",
+                    exception.Message
+                ),
+
+            UpdateTransactionNotFoundException or DeleteTransactionNotFoundException =>
+                (
+                    StatusCodes.Status404NotFound,
+                    "Transaction Not Found",
                     exception.Message
                 ),
 

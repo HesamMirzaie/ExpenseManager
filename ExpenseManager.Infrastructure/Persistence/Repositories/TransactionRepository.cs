@@ -73,9 +73,13 @@ public Task<Transaction?> GetByIdAsync(
     CancellationToken cancellationToken = default)
 {
     return _dbContext.Transactions
-        .AsNoTracking()
         .FirstOrDefaultAsync(
             transaction => transaction.Id == id,
             cancellationToken);
+}
+
+public void Remove(Transaction transaction)
+{
+    _dbContext.Transactions.Remove(transaction);
 }
 }

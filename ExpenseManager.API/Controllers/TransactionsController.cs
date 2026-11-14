@@ -3,6 +3,8 @@ using ExpenseManager.API.Contracts.Transactions;
 using ExpenseManager.API.Contracts.Common;
 using ExpenseManager.Application.Transactions.GetTransactions;
 using ExpenseManager.Application.Transactions.GetTransactionById;
+using ExpenseManager.Application.Transactions.UpdateTransaction;
+using ExpenseManager.Application.Transactions.DeleteTransaction;
 using ExpenseManager.Domain.Enums;
 using CreateTransactionHandler = ExpenseManager.Application.Transactions.CreateTransaction.CreateTransactionHandler;
 using GetTransactionsHandler = ExpenseManager.Application.Transactions.GetTransactions.GetTransactionsHandler;
@@ -18,15 +20,21 @@ public sealed class TransactionsController : ControllerBase
 
     private readonly GetTransactionsHandler _getTransactionsHandler;
     private readonly GetTransactionByIdHandler _getTransactionByIdHandler;
+    private readonly UpdateTransactionHandler _updateTransactionHandler;
+    private readonly DeleteTransactionHandler _deleteTransactionHandler;
 
     public TransactionsController(
         CreateTransactionHandler createTransactionHandler,
         GetTransactionsHandler getTransactionsHandler,
-        GetTransactionByIdHandler getTransactionByIdHandler)
+        GetTransactionByIdHandler getTransactionByIdHandler,
+        UpdateTransactionHandler updateTransactionHandler,
+        DeleteTransactionHandler deleteTransactionHandler)
     {
         _createTransactionHandler = createTransactionHandler;
         _getTransactionsHandler = getTransactionsHandler;
         _getTransactionByIdHandler = getTransactionByIdHandler;
+        _updateTransactionHandler = updateTransactionHandler;
+        _deleteTransactionHandler = deleteTransactionHandler;
     }
 
     [HttpPost]
@@ -112,5 +120,41 @@ public sealed class TransactionsController : ControllerBase
             transaction.Date);
 
         return Ok(response);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<TransactionResponse>> Update(
+        Guid id,
+        [FromBody] ExpenseManager.API.Contracts.Transactions.UpdateTransactionRequest request,
+        CancellationToken cancellationToken)
+    {
+        var applicationRequest =
+            new Application.Transactions.UpdateTransaction.UpdateTransactionRequest(
+                request.CategoryId,
+                request.Amount,
+                request.Description,
+                request.Date);
+
+        var transaction = await _updateTransactionHandler.HandleAsync(
+            id,
+            applicationRequest,
+            cancellationToken);
+
+        return Ok(new TransactionResponse(
+            transaction.Id,
+            transaction.CategoryId,
+            (int)transaction.Type,
+            transaction.Amount,
+            transaction.Description,
+            transaction.Date));
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        await _deleteTransactionHandler.HandleAsync(id, cancellationToken);
+        return NoContent();
     }
 }
