@@ -5,8 +5,16 @@ namespace ExpenseManager.Domain.Entities;
 public class Category
 {
     public Guid Id { get; private set; } = Guid.NewGuid();
-
-    public string Name { get; private set; }
+    private string _name = string.Empty;
+     public string Name
+    {
+        get => _name;
+        set
+        {
+            ValidateName(value);
+            _name = value.Trim();
+        }
+    }
 
     public TransactionType Type { get; private set; }
 
@@ -19,12 +27,7 @@ public class Category
         Type = type;
     }
 
-    public void ChangeName(string newName)
-    {
-        ValidateName(newName);
-        Name = newName.Trim();
-    }
-
+   
     private static void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
